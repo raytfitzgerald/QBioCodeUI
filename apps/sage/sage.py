@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-import pickle
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import train_test_split
@@ -251,6 +250,10 @@ class QuantumSage():
                                     n_jobs=-1)
         
         # Train
+        X_train = X_train.astype(np.float64)
+        X_test = X_test.astype(np.float64)
+        X_train = X_train.replace([np.inf, -np.inf], np.nan).fillna(0)
+        X_test = X_test.replace([np.inf, -np.inf], np.nan).fillna(0)
         rf_random.fit(X_train, y_train)
         preds = rf_random.predict(X_test)
         params = rf_random.best_params_
