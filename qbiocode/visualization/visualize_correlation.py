@@ -64,7 +64,7 @@ def compute_results_correlation( results_df, correlation = 'spearman', thresh = 
     return results_df, correlations_df
 
 def plot_results_correlation( correlations_df, metric = 'f1_score', title = '', correlation_type = '', figsize=(6,6), save_file_path = '', size = 'correlation',
-                             xticks = True):
+                             xticks = True, key = 'model_embed_datatype', legend_offset = 1.4):
     
     """This function plots the spearman correlation dot plots using the previously generated correlations_df dataframe. 
     The larger the circle, the higher the F1 score for that particular data set. The circle colors correspond to the 
@@ -101,24 +101,31 @@ def plot_results_correlation( correlations_df, metric = 'f1_score', title = '', 
                                                                 re.sub( '_', ' ', x ) ) ) ) ) ) ) for x in data['feature']]
 
 
+    if key == 'model_datatype':
+        data['datatype'] = [ '_'.join( x.split('_')[1:] ) for x in data[key]]
+        key_column = 'Model / Dataset'
+    else:
+        data['datatype'] = [ '_'.join( x.split('_')[2:] ) for x in data[key]]
+        key_column = 'Model / Embedding / Dataset'
+    
 
-    data['datatype'] = [ '_'.join( x.split('_')[2:] ) for x in data['model_embed_datatype']]
+
     data = data.sort_values( ['feature','datatype'], ascending = False )
-    data['model'] = [ re.sub( '_.*', '', x ) for x in data['model_embed_datatype']]
+    data['model'] = [ re.sub( '_.*', '', x ) for x in data[key]]
     data['model'] = [x.upper() for x in data['model']]
     data = pd.concat( [data[ ~data['model'].isin( ['QSVC', 'QNN', 'VQC', 'PQK']) ], data[ data['model'].isin( ['QSVC', 'QNN', 'VQC', 'PQK']) ] ] )
     fm = dict(zip( list(set(data['feature'])), range(len(set(data['feature']))) ) )
     data['feature_map'] = [ fm[x] for x in data['feature']]
     data['norm_size'] = [float(np.round(x*100)) for x in MinMaxScaler().fit_transform(data[size].values.reshape(-1,1))]
 
-    data['model_embed_datatype'] = [ re.sub( '_', ' / ', x ) for x in data['model_embed_datatype']]
+    data[key] = [ re.sub( '_', ' / ', x ) for x in data[key]]
 
     data = data.fillna(0)
     
     plt.figure(figsize=figsize)
-    ax = plt.scatter(data['model_embed_datatype'], data['feature'], s=data['norm_size'], 
+    ax = plt.scatter(data[key], data['feature'], s=data['norm_size'], 
                      c=data['correlation'], cmap='vlag', norm=norm)
-    plt.xlabel('Model / Embedding / Dataset')
+    plt.xlabel(key_column)
     plt.ylabel('Data feature')
     sns.despine()
     plt.title(title)
@@ -129,7 +136,7 @@ def plot_results_correlation( correlations_df, metric = 'f1_score', title = '', 
     smax = np.max(data[size])
     srate = (smax-smin)/(10-1)
     labels3 = [ round(float(x),2) for x in np.arange( smin, smax, srate)] + [round(smax,2)]
-    legend3 = plt.legend(handles+handles3, labels+labels3, title=correlation_type, bbox_to_anchor=(1.4, 1), loc='upper right')
+    legend3 = plt.legend(handles+handles3, labels+labels3, title=correlation_type, bbox_to_anchor=(legend_offset, 1), loc='upper right')
     plt.tight_layout() 
     if save_file_path != '':
         plt.savefig(save_file_path, dpi=300)
@@ -139,14 +146,16 @@ def plot_results_correlation( correlations_df, metric = 'f1_score', title = '', 
 
     model_qml = ['QNN', 'PQK', 'VQC' ,'QSVC']
     
-    data['Model / Embedding / Dataset'] = data['model_embed_datatype']
+    data[key_column] = data[key]
     data['Data feature'] = data['feature']
-    to_plot = data.pivot_table(columns = 'Model / Embedding / Dataset', index = 'Data feature', values = 'correlation')
+    to_plot = data.pivot_table(columns = key_column, index = 'Data feature', values = 'correlation')
     ccolors = [ 'magenta' if re.sub( ' .*', '', x) in model_qml else 'tan' for x in to_plot.columns]
+
     ax = sns.clustermap(to_plot.fillna(0),
-                        figsize=(12,7),
+                        figsize=figsize,
                         col_colors=ccolors,
                         cmap = 'vlag',
+                        method = 'average',
                         center = 0,
                         xticklabels = xticks,
                         )
@@ -156,5 +165,58 @@ def plot_results_correlation( correlations_df, metric = 'f1_score', title = '', 
     plt.tight_layout() 
     if save_file_path != '':
         plt.savefig(re.sub( '.pdf', '_heatmap.pdf', save_file_path ), dpi=300, bbox_inches='tight')
+    plt.show()
+    plt.close()
+
+
+    qml_col = [ x  for x in to_plot.columns if re.sub( ' .*', '', x) in model_qml]
+    cml_col = [ x  for x in to_plot.columns if re.sub( ' .*', '', x) not in model_qml]
+    # to_plot = pd.concat( [to_plot.loc[:,qml_col + cml_col ], to_plot.loc[:,cml_col ] ], axis =1)
+    to_plot = to_plot.loc[:,qml_col + cml_col ]
+    ccolors = [ 'magenta' if re.sub( ' .*', '', x) in model_qml else 'tan' for x in to_plot.columns]
+    ax = sns.clustermap(to_plot.fillna(0),
+                        figsize=figsize,
+                        col_colors=ccolors,
+                        col_cluster=False,
+                        cmap = 'vlag',
+                        center = 0,
+                        xticklabels = xticks,
+                        )
+    # ax.ax_row_dendrogram.set_visible(False) #suppress row dendrogram
+    # ax.ax_col_dendrogram.set_visible(False) #suppress column dendrogram
+
+    plt.tight_layout() 
+    if save_file_path != '':
+        plt.savefig(re.sub( '.pdf', '_noncluster_heatmap.pdf', save_file_path ), dpi=300, bbox_inches='tight')
+    plt.show()
+    plt.close()
+
+
+    datatypes = list(set(data['datatype']))
+
+    to_plot_datatype = pd.DataFrame()
+    for d in datatypes:
+        d_col = [ x for x in to_plot.columns if re.sub( '^.* ', '', x) == d ]
+        to_plot_d = to_plot.loc[:,d_col]
+        qml_col = [ x  for x in to_plot_d.columns if re.sub( ' .*', '', x) in model_qml]
+        cml_col = [ x  for x in to_plot_d.columns if re.sub( ' .*', '', x) not in model_qml]
+        to_plot_datatype = pd.concat( [to_plot_datatype, to_plot_d.loc[:,qml_col + cml_col ] ], axis = 1 )
+
+    ccolors = [ 'magenta' if re.sub( ' .*', '', x) in model_qml else 'tan' for x in to_plot_datatype.columns]
+    ax = sns.clustermap(to_plot_datatype.fillna(0),
+                        figsize=figsize,
+                        col_colors=ccolors,
+                        col_cluster=False,
+    
+                        cmap = 'vlag',
+                        center = 0,
+                        xticklabels = xticks,
+                        )
+    ax.ax_row_dendrogram.set_visible(False) #suppress row dendrogram
+    # ax.ax_col_dendrogram.set_visible(False) #suppress column dendrogram
+
+    plt.tight_layout() 
+    if save_file_path != '':
+        plt.savefig(re.sub( '.pdf', '_noncluster_heatmap.pdf', save_file_path ), dpi=300, bbox_inches='tight')
     plt.show()
     plt.close()
