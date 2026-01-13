@@ -2,6 +2,14 @@
 import time
 import numpy as np
 import os
+import pandas as pd
+from sklearn.metrics import confusion_matrix, classification_report, f1_score, accuracy_score, auc
+from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+from xgboost import XGBClassifier
 
 # ====== Additional local imports ======
 from qbiocode.evaluation.model_evaluation import modeleval
@@ -162,32 +170,141 @@ def compute_pqk(X_train, X_test, y_train, y_test, args, model='PQK', data_key = 
     projections_test = np.load( file_projection_test )
     projections_test = np.array(projections_test).reshape(len(projections_test), -1)
     
-    # Run SVC
-    gridsearch_svc_args= {'C': [0.1, 1, 10, 100], 
-                        'gamma': [0.001, 0.01, 0.1, 1],
-                        'kernel': ['linear', 'rbf', 'poly','sigmoid']
-                        }
-    
+    model_res = []
+    for method in ['rf', 'mlp', 'svc', 'lr', 'xgb']:
+        if method == 'rf':
+            model = create_rf_model(args['seed'])
+        elif method == 'svc':
+            model = create_svc_model(args['seed'])
+        elif method == 'mlp':
+            model = create_mlp_model(args['seed'])
+        elif method == 'lr':
+            model = create_lr_model(args['seed'])
+        else:
+            model = create_xgb_model(args['seed'])
+        
+        method_pqk = 'pqk_' + method
+        print(method_pqk)
+        model.fit(projections_train, y_train)
+        y_predicted = model.predict(projections_test)
 
-    svc = svm.SVC(random_state=args['seed'])
+        hyperparameters = {
+                            'feature_map': feature_map.__class__.__name__,
+                            'feature_map_reps': reps,
+                            'entanglement' : entanglement,                        
+                            'best_params': model.best_params_,
+                            # Add other hyperparameters as needed
+                            }
+        model_params = hyperparameters
 
-    # Initialize GridSearchCV
-    svc_random = GridSearchCV(estimator=svc, 
-                                param_grid=gridsearch_svc_args, 
+        model_res.append(modeleval(y_test, y_predicted, beg_time, model_params, args, model=method_pqk, verbose=verbose))
+
+    model_res = pd.concat(model_res)
+    return(model_res)
+
+
+
+def create_xgb_model(seed):
+    # Initialize the Logistic Regression Classifier
+    xgb = XGBClassifier(objective='binary:logistic', eval_metric='logloss')
+
+    xgb_param_distributions = {
+        'n_estimators': [100, 200, 300],
+        'learning_rate': [0.01, 0.1, 0.2],
+        'max_depth': [3, 5, 7],
+        'subsample': [0.7, 0.8, 1.0],
+        'colsample_bytree': [0.7, 0.8, 1.0],
+        'min_child_weight': [1, 3, 5]
+    }
+
+    # Initialize RandomizedSearchCV
+    xgb_model = RandomizedSearchCV(estimator=xgb, 
+                                param_distributions=xgb_param_distributions, 
+                                n_iter=40, 
                                 cv=5, 
+                                random_state=seed,
+                                n_jobs=-1)
+    
+    return xgb_model
+
+def create_lr_model(seed):
+    # Initialize the Logistic Regression Classifier
+    lr = LogisticRegression(random_state=seed, max_iter=1000)
+
+    lr_param_distributions = {
+        'C': [0.001, 0.01, 0.1, 1, 10, 100],
+        'penalty': ['l1', 'l2'],
+        'solver': ['liblinear', 'saga'] 
+    }
+
+    # Initialize RandomizedSearchCV
+    lr_model = RandomizedSearchCV(estimator=lr, 
+                                param_distributions=lr_param_distributions, 
+                                n_iter=40, 
+                                cv=5, 
+                                random_state=seed,
+                                n_jobs=-1)
+    
+    return lr_model
+
+
+def create_rf_model(seed):
+    # Initialize the Random Forest Classifier
+    rf = RandomForestClassifier(random_state=seed)
+
+    rf_param_distributions = {
+        'n_estimators': np.arange(100, 1000, 100),
+        'max_depth': np.arange(5, 20),
+        'min_samples_split': np.arange(2, 10),
+        'min_samples_leaf': np.arange(1, 5),
+        'bootstrap': [True, False]
+    }
+
+    # Initialize RandomizedSearchCV
+    rf_model = RandomizedSearchCV(estimator=rf, 
+                                param_distributions=rf_param_distributions, 
+                                n_iter=40, 
+                                cv=5, 
+                                random_state=seed,
+                                n_jobs=-1)
+    
+    return rf_model
+
+def create_mlp_model(seed):
+    mlp_param_distributions = {"hidden_layer_sizes": [(128,64,32,10), (64,32,10), (128,64,32)], 
+                            "activation": ["identity", "logistic", "tanh", "relu"], 
+                            "solver": ["lbfgs", "sgd", "adam"], 
+                            "alpha": [0.00005,0.0005]}
+
+    # Initialize the MLP Classifier
+    mlp = MLPClassifier(random_state=seed)
+
+    # Initialize RandomizedSearchCV
+    mlp_model = RandomizedSearchCV(estimator=mlp, 
+                                param_distributions=mlp_param_distributions, 
+                                n_iter=40, 
+                                cv=5, 
+                                random_state=seed,
                                 n_jobs=-1)
 
+    return mlp_model
 
-    svc_random.fit(projections_train, y_train)
-    y_predicted = svc_random.predict(projections_test)
+def create_svc_model(seed):
+    svc_param_distributions={
+        'C': [0.1, 1, 10, 100],
+        'gamma': [0.001, 0.01, 0.1, 1],
+        'kernel': ['linear', 'rbf', 'poly','sigmoid']
+        }
 
-    hyperparameters = {
-                        'feature_map': feature_map.__class__.__name__,
-                        'feature_map_reps': reps,
-                        'entanglement' : entanglement,                        
-                        'svc_best_params': svc_random.best_params_
-                        # Add other hyperparameters as needed
-                        }
-    model_params = hyperparameters
+    # Initialize the SVC
+    svc = SVC(random_state=seed)
+
+    # Initialize RandomizedSearchCV
+    svc_model = RandomizedSearchCV(estimator=svc, 
+                                param_distributions=svc_param_distributions, 
+                                n_iter=40, 
+                                cv=5, 
+                                random_state=seed,
+                                n_jobs=-1)   
     
-    return(modeleval(y_test, y_predicted, beg_time, model_params, args, model=model, verbose=verbose))
+    return svc_model
