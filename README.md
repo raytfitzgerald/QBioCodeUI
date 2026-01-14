@@ -20,7 +20,15 @@ The **QBioCode** framework allows for the development of several applications fo
 
 - QSage guides model selection based on the input data complexity metrics and model performance across various datasets. It allows the user to rank CML and QML models for an unseen dataset.
 
+## Tutorials
 
+We have provided tutorial notebooks on:
+
+- QProfiler usage including artificial data generation
+
+- QSage usage to train model selection tool
+
+- Quantum Projection Learning execution with classical baseline comparisons.
 
 ## Authors
 
