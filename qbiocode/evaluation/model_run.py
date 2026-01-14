@@ -8,6 +8,7 @@ from qbiocode import compute_dt, compute_dt_opt
 from qbiocode import compute_nb, compute_nb_opt
 from qbiocode import compute_lr, compute_lr_opt
 from qbiocode import compute_rf, compute_rf_opt
+from qbiocode import compute_xgb, compute_xgb_opt
 from qbiocode import compute_mlp, compute_mlp_opt
 
 # ====== Supervised QML functions imports ======
@@ -31,6 +32,8 @@ compute_ml_dict = {'svc_opt' : compute_svc_opt,
                    'nb' : compute_nb,
                    'rf_opt' : compute_rf_opt,
                    'rf' : compute_rf,
+                   'xgb_opt' : compute_xgb_opt,
+                   'xgb' : compute_xgb,
                    'mlp_opt' : compute_mlp_opt,
                    'mlp' : compute_mlp,
                    'qsvc' : compute_qsvc,

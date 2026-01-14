@@ -4,7 +4,7 @@
 config_file_name: 'basic_config'
 
 # specify output directory where input datasets are located
-folder_path: 'data/ld_data'
+folder_path: 'tutorial/QProfiler/data/ld_data'
 file_dataset: 'ALL'
 # or use a list as below, to only select a few datasets
 # file_dataset: ['file1', 'file2', 'file3', etc]
@@ -25,15 +25,16 @@ name: 'cleveland_clinic'
 n_jobs: 9
 
 # select the embedding method for reducing dimensionality (number of features) in your data set
-# embeddings: ['none']
-embeddings: ['pca', 'isomap', 'none']
+embeddings: ['none']
+# embeddings: ['pca', 'isomap', 'none']
 
 # number of dimensions (features) to embed (reduce) your data down to
 n_components: 3
 
 # ML models to generate
 # model: ['svc', 'dt', 'lr', 'nb', 'rf', 'mlp', 'qsvc', 'vqc', 'qnn', 'pqk']
-model: ['svc', 'rf',  'qsvc',  'pqk']
+# model: ['svc', 'rf',  'qsvc',  'pqk']
+model: ['xgb']
 
 average: 'weighted'
 multi_class: 'raise'
@@ -52,7 +53,7 @@ stratify: ['y']
 scaling: ['True']
 
 # this turns on a grid search (hyperparameter tuning) for the CML methods
-grid_search: False
+grid_search: True
 
 # n-fold cross validation
 cross_validation: 5
@@ -127,6 +128,25 @@ gridsearch_rf_args: {'n_estimators': [10, 50, 100, 200],
                      'min_samples_leaf': [1, 2, 4],
                      'bootstrap': [True, False]
                      }
+
+# begin XGB arguments
+xgb_args: {'n_estimators': 100,
+          'max_depth': null,
+          'learning_rate' : 0.5,
+          'subsample' : 0.5,
+          'colsample_bytree' : 1.0,
+          'min_child_weight' : 1,
+          }
+
+gridsearch_xgb_args: {'n_estimators': [50, 100, 200, 300],
+                      'max_depth': [5, 10, 20, 30, null],
+                      'learning_rate': [0.01, 0.1, 0.2],
+                      'subsample': [0.7, 0.8, 1.0],
+                      'colsample_bytree': [0.7, 0.8, 1.0],
+                      'min_child_weight': [1, 3, 5],
+                      'bootstrap': [True, False]
+                     }
+
 
 # Begin MLP arguments
 mlp_args: {'hidden_layer_sizes': 100,
