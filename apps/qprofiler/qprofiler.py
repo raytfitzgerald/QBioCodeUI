@@ -91,7 +91,8 @@ def main(args):
         summary.update({'label_mapping': y_map})
 
         # call and run evaluation functions
-        df_dataset = pd.DataFrame(X)
+        X_scaled = scaler_fn(X, scaling='MinMaxScaler')
+        df_dataset = pd.DataFrame(X_scaled)
         raw_data_eval = evaluate(df_dataset, y_encoded, file)
         appended_raw_data_eval.append(raw_data_eval)
 
