@@ -85,7 +85,7 @@ class QuantumSage():
         return predictions_df
 
 
-    def train_sub_sages(self, test_size=0.2, sage_type='random_forest', n_iter=50, cv=5):
+    def train_sub_sages(self, test_size=0.2, sage_type='random_forest', n_iter=None, cv=5):
         """
         Train sub-sage predictors for each ML model and performance metric.
         
@@ -101,15 +101,15 @@ class QuantumSage():
             Type of regressor to use as Sage. Options:
             
             - 'random_forest': Random Forest with hyperparameter tuning (default)
-            - 'mlp': Multi-Layer Perceptron with fixed architecture
+            - 'mlp': Multi-Layer Perceptron with grid search
             
         n_iter : int, optional
-            Number of iterations for hyperparameter search in Random Forest.
-            Default is 50. Higher values explore more combinations but take longer.
-            Only used when sage_type='random_forest'.
+            For Random Forest: number of hyperparameter search iterations (default: 50).
+            For MLP: maximum number of training epochs (default: 1000).
+            If None, uses the default for the selected sage_type.
         cv : int, optional
             Number of cross-validation folds for hyperparameter evaluation.
-            Default is 5. Only used when sage_type='random_forest'.
+            Default is 5. Used by both Random Forest and MLP.
         
         Returns
         -------
@@ -174,23 +174,28 @@ class QuantumSage():
                 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state = self._seed)
 
                 if sage_type == 'random_forest':
+                    # Use default n_iter=50 for Random Forest if not specified
+                    rf_n_iter = n_iter if n_iter is not None else 50
                     self._results_subsages[metric][model] = self._sage_random_forest(
-                        X_train, X_test, y_train, y_test, n_iter=n_iter, cv=cv
+                        X_train, X_test, y_train, y_test, n_iter=rf_n_iter, cv=cv
                     )
                 elif sage_type == 'mlp':
+                    # Use default n_iter=1000 for MLP if not specified
+                    mlp_n_iter = n_iter if n_iter is not None else 1000
                     self._results_subsages[metric][model] = self._sage_mlp(
-                        X_train, X_test, y_train, y_test, n_iter=n_iter, cv=cv
+                        X_train, X_test, y_train, y_test, n_iter=mlp_n_iter, cv=cv
                     )
                 else:
                     return None
 
-    def _sage_mlp(self, X_train, X_test, y_train, y_test, n_iter=50, cv=5):
+    def _sage_mlp(self, X_train, X_test, y_train, y_test, n_iter=1000, cv=5):
         """
-        Train a Multi-Layer Perceptron (MLP) regressor as a Sage predictor.
+        Train a Multi-Layer Perceptron (MLP) regressor as a Sage predictor with hyperparameter tuning.
         
-        This function trains an MLP regressor to predict model performance based on
-        data complexity features. The MLP uses a fixed architecture with adaptive
-        learning rate and early stopping to prevent overfitting.
+        This function performs a grid search over MLP hyperparameters to find the best
+        configuration, then makes predictions on the test set. The search uses cross-validation
+        to evaluate different parameter combinations. Early stopping is used to prevent
+        overfitting during training.
         
         The function is called internally by :meth:`train_sub_sages` and is not meant
         to be called directly by users. It is designed to work with preprocessed data
@@ -207,26 +212,29 @@ class QuantumSage():
         y_test : pd.Series
             Test labels (model performance values).
         n_iter : int, optional
-            Number of iterations for hyperparameter search (currently not used,
-            reserved for future parameter optimization). Default is 50.
+            Maximum number of training iterations (epochs) for the MLP. Default is 1000.
+            Training will run for at most this many iterations, but may stop earlier
+            if early stopping criteria are met (no improvement for 10 consecutive epochs).
+            Higher values allow more training time but take longer to run.
+            Lower values speed up training but may underfit if set too low.
         cv : int, optional
-            Number of cross-validation folds for model evaluation. Default is 5.
-            Note: Currently not used in MLP training but reserved for future
-            implementation of cross-validated hyperparameter tuning.
+            Number of cross-validation folds for hyperparameter evaluation. Default is 5.
+            Each parameter combination is evaluated using k-fold cross-validation to
+            ensure robust performance estimates.
         
         Returns
         -------
         dict
             Dictionary containing:
             
-            - 'fit_model' : MLPRegressor
-                Trained MLP model
+            - 'fit_model' : GridSearchCV
+                Trained MLP model with best parameters from grid search
             - 'preds' : np.ndarray
                 Predictions on test set
             - 'y_test' : pd.Series
                 True test labels
             - 'params' : dict
-                Model parameters
+                Best hyperparameters found by grid search
             - 'mae' : float
                 Mean Absolute Error on test set
             - 'mse' : float
@@ -238,45 +246,75 @@ class QuantumSage():
         
         Notes
         -----
-        The MLP architecture uses:
+        The hyperparameter search space includes:
         
-        - Hidden layers: (32, 10) neurons
-        - Activation: ReLU
-        - Solver: Adam optimizer
-        - Learning rate: Adaptive with initial rate of 0.001
-        - Early stopping: Stops if no improvement for 10 iterations
-        - Max iterations: 1000
+        - hidden_layer_sizes: [(32, 10), (64, 32), (100,), (50, 25)]
+        - activation: ['relu', 'tanh']
+        - solver: ['adam', 'lbfgs']
+        - alpha: [0.0001, 0.001, 0.01] (L2 regularization)
+        - learning_rate: ['constant', 'adaptive']
+        
+        The MLP uses:
+        
+        - Early stopping with patience of 10 epochs (``n_iter_no_change=10``)
+        - Adaptive learning rate starting at 0.001
+        - Maximum iterations controlled by ``n_iter`` parameter
+        - Automatic batch size
+        - 10% validation split for early stopping
+        
+        **Interpretation of n_iter for MLP:**
+        
+        Unlike Random Forest where ``n_iter`` controls the number of hyperparameter
+        search iterations, for MLP it controls the **maximum number of training epochs**.
+        The actual training may stop earlier due to early stopping (if no improvement
+        for 10 consecutive epochs). This allows you to control the training time while
+        still benefiting from early stopping to prevent overfitting.
         
         See Also
         --------
         _sage_random_forest : Alternative Random Forest sub-sage
         train_sub_sages : Main training function that calls this method
         """
+        from sklearn.model_selection import GridSearchCV
 
-        param_distributions = {"hidden_layer_sizes": [1,50], 
-                               "activation": ["identity", 
-                               "logistic", "tanh", "relu"], 
-                               "solver": ["lbfgs", "sgd", "adam"], 
-                               "alpha": [0.00005,0.0005]}
+        # Define hyperparameter grid for MLP
+        param_grid = {
+            'hidden_layer_sizes': [(32, 10), (64, 32), (100,), (50, 25)],
+            'activation': ['relu', 'tanh'],
+            'solver': ['adam', 'lbfgs'],
+            'alpha': [0.0001, 0.001, 0.01],
+            'learning_rate': ['constant', 'adaptive']
+        }
 
-        #TODO: Parameter optimization
+        # Initialize MLP with early stopping
+        mlp = MLPRegressor(
+            batch_size='auto',
+            learning_rate_init=0.001,
+            max_iter=n_iter,  # Use n_iter for maximum training iterations
+            random_state=self._seed,
+            n_iter_no_change=10,  # Fixed early stopping patience
+            early_stopping=True,
+            validation_fraction=0.1
+        )
 
-        model = MLPRegressor(hidden_layer_sizes=(32,10), 
-                             activation='relu', 
-                             solver='adam',
-                             alpha=0, 
-                             batch_size='auto',
-                             learning_rate='adaptive', 
-                             learning_rate_init=0.001, 
-                             max_iter=1000, 
-                             random_state=self._seed, 
-                             n_iter_no_change=10)
+        # Initialize GridSearchCV with configurable cv parameter
+        mlp_grid = GridSearchCV(
+            estimator=mlp,
+            param_grid=param_grid,
+            cv=cv,
+            n_jobs=-1,
+            scoring='r2'
+        )
         
         # Train
-        model.fit(X_train, y_train)
-
-        preds = model.predict(X_test)
-        params = model.get_params()
+        X_train = X_train.astype(np.float64)
+        X_test = X_test.astype(np.float64)
+        X_train = X_train.replace([np.inf, -np.inf], np.nan).fillna(0)
+        X_test = X_test.replace([np.inf, -np.inf], np.nan).fillna(0)
+        
+        mlp_grid.fit(X_train, y_train)
+        preds = mlp_grid.predict(X_test)
+        params = mlp_grid.best_params_
 
         # Evaluate on held out
         mae = mean_absolute_error(y_test, preds)
@@ -285,14 +323,14 @@ class QuantumSage():
         r2 = r2_score(y_test, preds)
 
         result = {
-            'fit_model' : model,
-            'preds' : preds,
-            'y_test' : y_test,
-            'params' : params,
-            'mae' : mae,
-            'mse' : mse,
-            'rmse' : rmse,
-            'r2' : r2
+            'fit_model': mlp_grid,
+            'preds': preds,
+            'y_test': y_test,
+            'params': params,
+            'mae': mae,
+            'mse': mse,
+            'rmse': rmse,
+            'r2': r2
         }
 
         return result
@@ -567,15 +605,16 @@ For more information, see: https://ibm.github.io/QBioCode/apps/sage.html
     parser.add_argument(
         '--n-iter',
         type=int,
-        default=50,
-        help='Number of iterations for hyperparameter search (Random Forest only, default: 50)'
+        default=None,
+        help='For Random Forest: number of hyperparameter search iterations (default: 50). '
+             'For MLP: maximum training epochs (default: 1000)'
     )
     
     parser.add_argument(
         '--cv',
         type=int,
         default=5,
-        help='Number of cross-validation folds (Random Forest only, default: 5)'
+        help='Number of cross-validation folds for hyperparameter evaluation (default: 5)'
     )
     
     args = parser.parse_args()
