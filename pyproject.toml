@@ -7,7 +7,7 @@ name = "qbiocode"
 dynamic = ["version"]
 description = "A comprehensive suite of computational resources for quantum computing applications in healthcare and life science data analysis"
 readme = "README.md"
-requires-python = ">=3.9,<3.12"
+requires-python = ">=3.9,<3.13"
 license = {text = "Apache License 2.0"}
 authors = [
     {name = "Bryan Raubenolt", email = "raubenb@ccf.org"},
@@ -51,6 +51,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3 :: Only",
     "Operating System :: OS Independent",
     "Natural Language :: English",
@@ -126,7 +127,7 @@ qbiocode = ["py.typed"]
 
 [tool.black]
 line-length = 100
-target-version = ['py39', 'py310', 'py311']
+target-version = ['py39', 'py310', 'py311', 'py312']
 include = '\.pyi?$'
 
 [tool.pytest.ini_options]

@@ -1,7 +1,7 @@
 
- [![Minimum Python Version](https://img.shields.io/badge/Python-%3E=%203.9-blue)](https://www.python.org/downloads/) [![Maximum Python Version Tested](https://img.shields.io/badge/Python-%3C=%203.11-blueviolet)](https://www.python.org/downloads/) [![Supported Python Versions](https://img.shields.io/badge/Python-3.9%20%7C%203.10%20%7C%203.11-blue)](https://www.python.org/downloads/) 
+ [![Minimum Python Version](https://img.shields.io/badge/Python-%3E=%203.9-blue)](https://www.python.org/downloads/) [![Maximum Python Version Tested](https://img.shields.io/badge/Python-%3C=%203.12-blueviolet)](https://www.python.org/downloads/) [![Supported Python Versions](https://img.shields.io/badge/Python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/downloads/)
  
- This project has been tested and is compatible with Python versions 3.9, 3.10, and 3.11. While it might work on other versions, these are the officially supported and tested ones. 
+ This project has been tested and is compatible with Python versions 3.9, 3.10, 3.11, and 3.12. While it might work on other versions, these are the officially supported and tested ones.
 
 # Getting Started
 
@@ -59,7 +59,7 @@ Once the activated, you'll see `(venv)` at the beginning of your terminal promt.
 
 1. Create the environment from the `requirements.txt` file.  This can be done using anaconda, miniconda, miniforge, or any other environment manager.
 ```
-conda create -n qbc python==3.11
+conda create -n qbc python==3.12
 
 ```
 * Note: if you receive the error `bash: conda: command not found...`, you need to install some form of anaconda to your development environment.
@@ -112,7 +112,7 @@ If you prefer not to install QBioCode on your local or personal machine, you can
 4. Click on the Jupyter tool to launch it
 
 5. Configure the notebook environment:
-   - **Select Python version**: Choose Python 3.9, 3.10, or 3.11
+   - **Select Python version**: Choose Python 3.9, 3.10, 3.11, or 3.12
    - **Allocate resources**: Default settings are usually sufficient
    - Click **"Execute"** or **"Run Tool"**
 

@@ -120,7 +120,7 @@ setup(
     },
     
     # Python version requirement
-    python_requires='>=3.9,<3.12',
+    python_requires='>=3.9,<3.13',
     
     # PyPI classifiers
     classifiers=[
@@ -146,6 +146,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3 :: Only",
         
         # Operating system
