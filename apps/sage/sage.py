@@ -98,10 +98,12 @@ class QuantumSage():
         test_size : float, optional
             Proportion of data to use for testing (0.0 to 1.0). Default is 0.2.
         sage_type : str, optional
-            Type of regressor to use as Sage. Options:
+            Type of regressor to use as Sage. Must be one of:
             
             - 'random_forest': Random Forest with hyperparameter tuning (default)
             - 'mlp': Multi-Layer Perceptron with grid search
+            
+            Only ONE sage type can be selected per training run.
             
         n_iter : int, optional
             For Random Forest: number of hyperparameter search iterations (default: 50).
@@ -135,10 +137,19 @@ class QuantumSage():
                     ...
                 }
         
+        Raises
+        ------
+        ValueError
+            If sage_type is not 'random_forest' or 'mlp'.
+        
         Notes
         -----
         The function iterates over all available metrics and models, training a
         separate predictor for each combination. Progress is printed during training.
+        
+        Only one sage type can be used per training run. If you want to compare
+        Random Forest and MLP sages, you need to train them separately and compare
+        their results.
         
         Examples
         --------
@@ -160,6 +171,14 @@ class QuantumSage():
         _sage_mlp : MLP Sage implementation
         predict : Make predictions using trained Sages
         """
+        # Validate sage_type parameter
+        valid_sage_types = ['random_forest', 'mlp']
+        if sage_type not in valid_sage_types:
+            raise ValueError(
+                f"Invalid sage_type '{sage_type}'. Must be one of {valid_sage_types}. "
+                f"Only one sage type can be selected per training run."
+            )
+        
         for metric in self._available_metrics:
             print(f"Working on {metric}")
 
@@ -185,8 +204,6 @@ class QuantumSage():
                     self._results_subsages[metric][model] = self._sage_mlp(
                         X_train, X_test, y_train, y_test, n_iter=mlp_n_iter, cv=cv
                     )
-                else:
-                    return None
 
     def _sage_mlp(self, X_train, X_test, y_train, y_test, n_iter=1000, cv=5):
         """
@@ -554,8 +571,11 @@ def main():
         # With custom cross-validation and hyperparameter search
         qsage --input compiled_results.csv --output results/ --cv 10 --n-iter 100
         
-        # Train only Random Forest sub-sages
+        # Train Random Forest sub-sages
         qsage --input data.csv --output results/ --model-type rf --seed 42
+        
+        # Train MLP sub-sages
+        qsage --input data.csv --output results/ --model-type mlp --n-iter 2000
     """
     import argparse
     import sys
@@ -599,9 +619,10 @@ For more information, see: https://ibm.github.io/QBioCode/apps/sage.html
     
     parser.add_argument(
         '--model-type',
-        default='both',
-        choices=['rf', 'mlp', 'both'],
-        help='Type of sub-sage model to train: rf (Random Forest), mlp (MLP), or both (default: both)'
+        default='random_forest',
+        choices=['rf', 'mlp', 'random_forest'],
+        help='Type of sub-sage model to train: rf/random_forest (Random Forest) or mlp (MLP). '
+             'Default: random_forest. Only one type can be trained per run.'
     )
     
     parser.add_argument(
@@ -644,9 +665,12 @@ For more information, see: https://ibm.github.io/QBioCode/apps/sage.html
     print(f"Test size: {args.test_size}")
     print(f"Random seed: {args.seed}")
     print(f"Model type: {args.model_type}")
-    if args.model_type in ['rf', 'both']:
-        print(f"Hyperparameter search iterations: {args.n_iter}")
-        print(f"Cross-validation folds: {args.cv}")
+    print(f"Cross-validation folds: {args.cv}")
+    if args.n_iter is not None:
+        if args.model_type in ['rf', 'random_forest']:
+            print(f"Hyperparameter search iterations: {args.n_iter}")
+        else:
+            print(f"Maximum training epochs: {args.n_iter}")
     print("="*80)
     
     # Load data
@@ -673,23 +697,21 @@ For more information, see: https://ibm.github.io/QBioCode/apps/sage.html
     # Train sub-sages
     print(f"\nTraining sub-sages...")
     try:
-        if args.model_type in ['rf', 'both']:
-            print("  Training Random Forest sub-sages...")
-            sage.train_sub_sages(
-                test_size=args.test_size,
-                sage_type='random_forest',
-                n_iter=args.n_iter,
-                cv=args.cv
-            )
+        # Map CLI argument to sage_type
+        sage_type_map = {
+            'rf': 'random_forest',
+            'random_forest': 'random_forest',
+            'mlp': 'mlp'
+        }
+        sage_type = sage_type_map[args.model_type]
         
-        if args.model_type in ['mlp', 'both']:
-            print("  Training MLP sub-sages...")
-            sage.train_sub_sages(
-                test_size=args.test_size,
-                sage_type='mlp',
-                n_iter=args.n_iter,
-                cv=args.cv
-            )
+        print(f"  Training {sage_type} sub-sages...")
+        sage.train_sub_sages(
+            test_size=args.test_size,
+            sage_type=sage_type,
+            n_iter=args.n_iter,
+            cv=args.cv
+        )
         
         print("Training complete!")
     except Exception as e:

@@ -146,7 +146,7 @@ This trains QSage on historical QProfiler data and generates predictions for all
 **Optional Arguments:**
 
 - ``--seed, -s``: Random seed for reproducibility (default: 42)
-- ``--model-type``: Type of sub-sage model to train: ``rf`` (Random Forest), ``mlp`` (MLP), or ``both`` (default: both)
+- ``--model-type``: Type of sub-sage model to train: ``rf`` (Random Forest) or ``mlp`` (MLP). Default: ``random_forest``. **Only one type can be trained per run.**
 - ``--test-size``: Proportion of data to use for testing (default: 0.2)
 
 **Examples**
@@ -154,8 +154,11 @@ This trains QSage on historical QProfiler data and generates predictions for all
 Train with Random Forest only:
 
 .. code-block:: bash
+qsage --input qprofiler_results.csv --output results/ --model-type rf
 
-   qsage --input qprofiler_results.csv --output results/ --model-type rf
+# Or train MLP sub-sages
+qsage --input qprofiler_results.csv --output results/ --model-type mlp
+
 
 Train with custom seed and test size:
 
@@ -166,8 +169,9 @@ Train with custom seed and test size:
 Train both Random Forest and MLP:
 
 .. code-block:: bash
+# Train MLP with more epochs
+qsage --input data.csv --output results/ --model-type mlp --n-iter 2000
 
-   qsage --input data.csv --output results/ --model-type both
 
 **Output Files**
 
