@@ -610,3 +610,119 @@ List of dataset names that were successfully completed in the previous run.
    - :doc:`QProfiler Tutorial <../tutorials/QProfiler/example_qprofiler>` - Complete workflow examples
    - :doc:`Configuration Guide <config>` - Setting up batch processing
    - :py:func:`qbiocode.utils.dataset_checkpoint.checkpoint_restart` - Full API documentation
+
+
+Utility Functions
+=================
+
+QBioCode provides several utility functions that can help with batch processing workflows, configuration management, and file organization.
+
+Finding Duplicate Files
+-----------------------
+
+When generating multiple experiment configurations (e.g., via grid search), you may accidentally create duplicate configuration files. The ``find_duplicate_files`` function helps identify these duplicates before running batch jobs.
+
+.. code-block:: python
+
+   from qbiocode.utils.find_duplicates import find_duplicate_files
+   
+   # Find duplicate YAML configs
+   duplicates = find_duplicate_files(
+       'configs/qml_gridsearch/',
+       file_pattern='.yaml',
+       verbose=True
+   )
+   
+   if duplicates:
+       print(f"Warning: Found {len(duplicates)} duplicate configuration pairs")
+       for file1, file2 in duplicates:
+           print(f"  {file1}")
+           print(f"  {file2}")
+           # Optionally remove one of the duplicates
+           # os.remove(file2)
+
+**Use Cases:**
+
+- Validate experiment configurations before batch processing
+- Clean up redundant config files from grid search generation
+- Identify duplicate datasets in data directories
+- Audit configuration consistency across projects
+
+Searching for Strings in Files
+-------------------------------
+
+The ``find_string_in_files`` function helps you quickly locate specific parameters or settings across multiple configuration files.
+
+.. code-block:: python
+
+   from qbiocode.utils.find_string import find_string_in_files
+   
+   # Find all configs using PCA embedding
+   results = find_string_in_files(
+       'configs/experiments/',
+       'embeddings: pca',
+       file_pattern='.yaml',
+       return_lines=True
+   )
+   
+   print(f"Found in {len(results)} configuration files:")
+   for filepath, matches in results.items():
+       print(f"\n{filepath}:")
+       for line_num, line_content in matches:
+           print(f"  Line {line_num}: {line_content.strip()}")
+
+**Use Cases:**
+
+- Find all configs using a specific model or embedding
+- Audit parameter settings across experiments
+- Locate configurations with specific quantum backend settings
+- Validate consistency of hyperparameters
+
+Combined Workflow Example
+-------------------------
+
+Here's a complete example combining these utilities with QProfiler batch processing:
+
+.. code-block:: python
+
+   import os
+   from qbiocode.utils.dataset_checkpoint import checkpoint_restart
+   from qbiocode.utils.find_duplicates import find_duplicate_files
+   from qbiocode.utils.find_string import find_string_in_files
+   
+   # Step 1: Check for duplicate configs
+   config_dir = "configs/experiments/"
+   duplicates = find_duplicate_files(config_dir, file_pattern='.yaml')
+   
+   if duplicates:
+       print(f"Warning: {len(duplicates)} duplicate configs found")
+       # Handle duplicates (remove or rename)
+   
+   # Step 2: Verify all configs use correct settings
+   results = find_string_in_files(
+       config_dir,
+       'n_splits: 5',  # Ensure all use 5-fold CV
+       file_pattern='.yaml'
+   )
+   
+   if len(results) != len(os.listdir(config_dir)):
+       print("Warning: Not all configs use 5-fold cross-validation")
+   
+   # Step 3: Check for previous results and resume
+   if os.path.exists('./previous_results'):
+       completed = checkpoint_restart('./previous_results', verbose=True)
+   else:
+       completed = []
+   
+   # Step 4: Process remaining datasets
+   all_datasets = [f.replace('.csv', '') for f in os.listdir('./data')
+                   if f.endswith('.csv')]
+   remaining = [d for d in all_datasets if d not in completed]
+   
+   print(f"\nReady to process {len(remaining)} datasets")
+   # Continue with QProfiler batch processing...
+
+.. seealso::
+   - :py:func:`qbiocode.utils.find_duplicates.find_duplicate_files` - Full API documentation
+   - :py:func:`qbiocode.utils.find_string.find_string_in_files` - Full API documentation
+   - :py:func:`qbiocode.utils.dataset_checkpoint.checkpoint_restart` - Full API documentation
