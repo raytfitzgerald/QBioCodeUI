@@ -84,7 +84,21 @@ def model_run(X_train, X_test, y_train, y_test, data_key, args):
     if 'grid_search' in args.keys():
         grid_search = args['grid_search']
     
-   
+    # Check if any quantum models are in the model list when grid_search is enabled
+    if grid_search:
+        quantum_in_models = [m for m in args['model'] if m in quantum_models]
+        if quantum_in_models:
+            print("\n" + "="*80)
+            print("WARNING: Grid search is enabled with quantum models:", quantum_in_models)
+            print("="*80)
+            print("Quantum models do not support automated grid search.")
+            print("For hyperparameter tuning of quantum models, you should:")
+            print("  1. Create multiple configuration files with different hyperparameters")
+            print("  2. Run QProfiler separately for each configuration")
+            print("  3. Compare results across runs")
+            print("\nSee the archived tutorial notebooks for config generation examples:")
+            print("  archive/tutorial_notebooks/qml_experiment_generators/generate_experiments.ipynb")
+            print("="*80 + "\n")
     
     if grid_search:
         results = []
