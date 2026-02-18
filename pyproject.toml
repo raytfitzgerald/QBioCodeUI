@@ -19,7 +19,7 @@ authors = [
     {name = "Laxmi Parida", email = "parida@us.ibm.com"},
 ]
 maintainers = [
-    {name = "IBM Research", email = "a.bose@ibm.com"},
+    {name = "IBM Research"},
 ]
 keywords = [
     "quantum machine learning",
