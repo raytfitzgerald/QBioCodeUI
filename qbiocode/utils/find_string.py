@@ -1,6 +1,5 @@
 import os
 
-#os.path.join('configs', 'configs_CCC_grid')
 def find_string_in_file(file_path, search_string):
     '''This function searches for a specific string in all files within a given directory.
     It prints the names of files that contain the string and counts how many files contain it.

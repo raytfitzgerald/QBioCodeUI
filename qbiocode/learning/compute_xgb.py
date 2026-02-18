@@ -14,7 +14,7 @@ from qbiocode.evaluation.model_evaluation import modeleval
 
 # ====== Begin functions ======
 
-def compute_xgb(X_train, X_test, y_train, y_test, args, verbose=False, model='Random Forest', data_key = '',
+def compute_xgb(X_train, X_test, y_train, y_test, args, verbose=False, model='xgb', data_key = '',
                n_estimators=100, *, criterion='gini', max_depth=None, subsample=0.5, learning_rate=0.5, 
                colsample_bytree=1, min_child_weight=1):
         
@@ -56,7 +56,7 @@ def compute_xgb(X_train, X_test, y_train, y_test, args, verbose=False, model='Ra
     y_predicted = xgb.predict(X_test) 
     return(modeleval(y_test, y_predicted, beg_time, model_params, args, model=model, verbose=verbose))
 
-def compute_xgb_opt(X_train, X_test, y_train, y_test, args, verbose=False, cv=5, model='Random Forest',
+def compute_xgb_opt(X_train, X_test, y_train, y_test, args, verbose=False, cv=5, model='xgb',
                    bootstrap= [], max_depth= [], max_features= [],learning_rate=[],subsample = [], colsample_bytree = []
                    , n_estimators= [], min_child_weight = []):
     

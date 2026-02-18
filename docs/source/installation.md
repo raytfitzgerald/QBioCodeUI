@@ -78,19 +78,145 @@ pip list
    * [Set up / install Anaconda on remote linux server](https://kengchichang.com/post/conda-linux/)
    * [Set up remote development environment using VSCode](https://code.visualstudio.com/docs/remote/ssh) -->
 
+## Option 3: Using Galaxy (Cloud-Based, No Local Installation)
+
+If you prefer not to install QBioCode on your local or personal machine, you can use [Galaxy](https://usegalaxy.org/), a free, web-based platform for data-intensive biomedical research.
+
+```{admonition} Why Galaxy?
+:class: tip
+- **No installation required**: Run everything in your browser
+- **Free computational resources**: Access to cloud computing
+- **Jupyter notebook support**: Run QBioCode tutorials directly
+- **Persistent workspace**: Your work is saved in the cloud
+```
+
+### Step 1: Register for a Galaxy Account
+
+1. Go to [https://usegalaxy.org/](https://usegalaxy.org/)
+2. Click **"Login or Register"** in the top menu
+3. Select **"Register"** and fill in:
+   - Email address
+   - Password
+   - Public name (username)
+4. Click **"Create"** to complete registration
+5. Verify your email address (check your inbox for confirmation link)
+
+### Step 2: Launch a Jupyter Notebook Server
+
+1. **Log in** to your Galaxy account at [https://usegalaxy.org/](https://usegalaxy.org/)
+
+2. From the top menu, select **"Interactive Tools"**
+
+3. Search for **"Jupyter Notebook"** or **"JupyterLab"**
+
+4. Click on the Jupyter tool to launch it
+
+5. Configure the notebook environment:
+   - **Select Python version**: Choose Python 3.9, 3.10, or 3.11
+   - **Allocate resources**: Default settings are usually sufficient
+   - Click **"Execute"** or **"Run Tool"**
+
+6. Wait for the notebook server to start (this may take 1-2 minutes)
+
+7. Once ready, click the **link** to open your Jupyter environment in a new tab
+
+### Step 3: Install QBioCode in Galaxy Jupyter
+
+Once your Jupyter notebook server is running:
+
+1. **Open a new terminal** in Jupyter:
+   - Click **"File" → "New" → "Terminal"** (in JupyterLab)
+   - Or use the **"New" → "Terminal"** button (in classic Jupyter)
+
+2. **Install QBioCode** using Option 1 (pip install):
+
+   ```bash
+   # Clone the repository
+   git clone https://github.com/IBM/QBioCode.git
+   cd QBioCode
+   
+   # Install QBioCode
+   pip install .
+   ```
+
+3. **Verify installation**:
+
+   ```bash
+   python -c "import qbiocode; print('QBioCode installed successfully!')"
+   ```
+
+### Step 4: Run QBioCode Tutorials
+
+1. **Navigate to the tutorial directory**:
+
+   ```bash
+   cd tutorial
+   ```
+
+2. **Open a tutorial notebook**:
+   - In the Jupyter file browser, navigate to `QBioCode/tutorial/`
+   - Click on any tutorial notebook to open it:
+     - `QProfiler/example_qprofiler.ipynb`
+     - `QSage/qsage.ipynb`
+     - `Artificial_data_generation/example_data_generation.ipynb`
+     - `Quantum_Projection_Learning/QPL_example.ipynb`
+
+3. **Run the tutorial**:
+   - Execute cells sequentially using **Shift+Enter**
+   - Follow the instructions in each notebook
+
+### Tips for Using Galaxy
+
+```{tip}
+**Best Practices:**
+- **Save your work frequently**: Use File → Save to preserve your progress
+- **Download important results**: Export notebooks and data files to your local machine
+- **Monitor resource usage**: Galaxy sessions have time limits; plan accordingly
+- **Use version control**: Consider connecting to GitHub for better workflow management
+```
+
+```{warning}
+**Important Limitations:**
+- Galaxy sessions may timeout after inactivity (typically 1-2 hours)
+- Computational resources are shared; quantum simulations may be slower
+- Large datasets may require local installation for better performance
+- IBM Quantum hardware access requires separate IBM Quantum account setup
+```
+
+### Troubleshooting Galaxy Installation
+
+**Issue: pip install fails**
+```bash
+# Try upgrading pip first
+pip install --upgrade pip
+pip install .
+```
+
+**Issue: Import errors**
+```bash
+# Restart the kernel: Kernel → Restart Kernel
+# Then re-import
+import qbiocode
+```
+
+**Issue: Session timeout**
+- Save your work regularly
+- Download notebooks before closing
+- Restart the interactive tool if needed
+
+### Alternative: Google Colab
+
+Another cloud-based option is [Google Colab](https://colab.research.google.com/):
+
+```python
+# In a Colab notebook cell:
+!git clone https://github.com/IBM/QBioCode.git
+%cd QBioCode
+!pip install .
+```
+
+Then upload tutorial notebooks from the `tutorial/` directory.
+
+---
+
 <a name="running_qbiocode"></a>
-<!-- ### Running QBioCode -->
-
-<!-- [![Notebook Template][notebook]](#running_comical) -->
-
-<!-- 1. Request resources from computing cluster:
-```
-jbsub -cores 2+1 -q x86_1h -mem 5g -interactive bash
-```
-OR
-Submit your job without the interactive session (shown later).  -->
-
-<!-- 2. Activate the new environment:
-```
-conda activate qbiocode
-``` -->
