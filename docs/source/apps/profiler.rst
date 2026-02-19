@@ -454,7 +454,66 @@ Each model can have standard parameters and grid search parameters:
       kernel: ['linear', 'rbf', 'poly', 'sigmoid']
 
 .. important::
-    **For quantum models:** Grid search requires generating separate config files for each parameter combination. Use the ``generate_experiments.ipynb`` notebook in ``tutorial_notebooks/qml_experiment_generators/``.
+    **For quantum models:** Grid search requires generating separate config files for each parameter combination.
+    Use the :func:`qbiocode.utils.generate_qml_experiment_configs` utility function:
+    
+    .. code-block:: python
+    
+        from qbiocode.utils import generate_qml_experiment_configs
+        
+        # Generate config files for quantum model hyperparameter tuning
+        num_configs, used_files = generate_qml_experiment_configs(
+            template_config_path='configs/config.yaml',
+            output_dir='configs/qml_gridsearch',
+            data_dirs=['data/tutorial_test_data/lower_dim_datasets'],
+            qmethods=['qnn', 'vqc', 'qsvc'],
+            reps=[1, 2],
+            n_components=[5, 10],
+            embeddings=['none', 'pca', 'isomap']  # Subset of available: none, pca, lle, isomap, spectral, umap, nmf
+        )
+        
+        print(f"Generated {num_configs} configuration files")
+        
+        # Then run QProfiler for each generated config
+        
+    **Running Generated Configs**
+    
+    After generating config files, you have several options to execute them:
+    
+    **Option 1: Manual execution** (for small numbers of configs)
+    
+    .. code-block:: bash
+    
+        qprofiler --config configs/qml_gridsearch/exp_1.yaml
+        qprofiler --config configs/qml_gridsearch/exp_2.yaml
+        # ... etc.
+    
+    **Option 2: Bash loop** (for local execution)
+    
+    .. code-block:: bash
+    
+        # Run all configs sequentially
+        for i in {1..100}; do
+            qprofiler --config configs/qml_gridsearch/exp_${i}.yaml
+        done
+    
+    **Option 3: SLURM array job** (for HPC clusters)
+    
+    .. code-block:: bash
+    
+        #!/bin/bash
+        #SBATCH --array=1-100%10    # Run 100 jobs, max 10 concurrent
+        #SBATCH -c 9                # 9 CPUs per job
+        #SBATCH --mem=12000         # 12GB memory
+        #SBATCH -p your_partition
+        
+        qprofiler --config configs/qml_gridsearch/exp_${SLURM_ARRAY_TASK_ID}.yaml
+    
+    .. tip::
+        For large hyperparameter grids (hundreds of configs), use SLURM array jobs on HPC clusters for parallel execution.
+        Adjust ``--array`` range to match your number of configs and ``%N`` to control concurrent jobs based on cluster resources.
+    
+    See :func:`qbiocode.utils.generate_qml_experiment_configs` for full documentation and all available parameters.
 
 Detailed Configuration Reference
 ---------------------------------

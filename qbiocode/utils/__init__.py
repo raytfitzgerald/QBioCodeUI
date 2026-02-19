@@ -15,6 +15,7 @@ Available Functions
 - combine_results: Combine evaluation results from multiple runs
 - find_duplicate_files: Find duplicate entries in datasets
 - find_string_in_files: Search for strings in files
+- generate_qml_experiment_configs: Generate config files for QML grid search
 - get_creds: Get IBM Quantum credentials
 - instantiate_runtime_service: Instantiate Qiskit Runtime Service
 - get_backend_session: Get backend session for quantum execution
@@ -39,6 +40,7 @@ from .dataset_checkpoint import checkpoint_restart
 from .combine_evals_results import track_progress, combine_results
 from .find_duplicates import find_duplicate_files
 from .find_string import find_string_in_files
+from .generate_qml_configs import generate_qml_experiment_configs
 from .ibm_account import get_creds, instantiate_runtime_service
 from .qutils import (
     get_backend_session,
@@ -61,6 +63,9 @@ __all__ = [
     # Results management
     'track_progress',
     'combine_results',
+    
+    # Configuration generation
+    'generate_qml_experiment_configs',
     
     # File utilities
     'find_duplicate_files',

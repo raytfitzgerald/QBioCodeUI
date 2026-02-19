@@ -17,11 +17,7 @@ Before running these tutorials, make sure you have:
 
 Learn how to generate synthetic datasets for testing and benchmarking quantum machine learning algorithms.
 
-```{toctree}
-:maxdepth: 1
-
-tutorials/Artificial_data_generation/example_data_generation.ipynb
-```
+<a href="tutorials/Artificial_data_generation/example_data_generation.html">📓 <strong>View Tutorial Notebook</strong></a>
 
 ---
 
@@ -29,11 +25,7 @@ tutorials/Artificial_data_generation/example_data_generation.ipynb
 
 Learn how to use QProfiler to systematically benchmark and compare quantum and classical machine learning models on artificial datasets. This tutorial demonstrates:
 
-```{toctree}
-:maxdepth: 1
-
-tutorials/QProfiler/example_qprofiler.ipynb
-```
+<a href="tutorials/QProfiler/example_qprofiler.html">📓 <strong>View Tutorial Notebook</strong></a>
 
 **What You'll Learn:**
 - Generate artificial datasets with specific characteristics
@@ -49,11 +41,7 @@ tutorials/QProfiler/example_qprofiler.ipynb
 
 Explore QSage, an intelligent meta-learning system that predicts which machine learning models will perform best on your dataset *before* you run them. By learning from data complexity patterns across multiple datasets, QSage provides data-driven model recommendations. This tutorial shows how to:
 
-```{toctree}
-:maxdepth: 1
-
-tutorials/QSage/qsage.ipynb
-```
+<a href="tutorials/QSage/qsage.html">📓 <strong>View Tutorial Notebook</strong></a>
 
 **What You'll Learn:**
 - Load pre-trained QSage models
@@ -66,11 +54,7 @@ tutorials/QSage/qsage.ipynb
 
 Learn about Quantum Projection Learning techniques and their applications in machine learning workflows.
 
-```{toctree}
-:maxdepth: 1
-
-tutorials/Quantum_Projection_Learning/QPL_example.ipynb
-```
+<a href="tutorials/Quantum_Projection_Learning/QPL_example.html">📓 <strong>View Tutorial Notebook</strong></a>
 
 **Topics Covered:**
 - Quantum projection methods
@@ -83,11 +67,7 @@ tutorials/Quantum_Projection_Learning/QPL_example.ipynb
 
 Explore the Projected Quantum Kernel approach for quantum machine learning.
 
-```{toctree}
-:maxdepth: 1
-
-tutorials/PQK_OV.ipynb
-```
+<a href="tutorials/PQK%20-%20OV.html">📓 <strong>View Tutorial Notebook</strong></a>
 
 **Key Concepts:**
 - Quantum kernel methods

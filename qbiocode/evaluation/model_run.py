@@ -96,8 +96,14 @@ def model_run(X_train, X_test, y_train, y_test, data_key, args):
             print("  1. Create multiple configuration files with different hyperparameters")
             print("  2. Run QProfiler separately for each configuration")
             print("  3. Compare results across runs")
-            print("\nSee the archived tutorial notebooks for config generation examples:")
-            print("  archive/tutorial_notebooks/qml_experiment_generators/generate_experiments.ipynb")
+            print("\nUse the config generation utility:")
+            print("  from qbiocode.utils import generate_qml_experiment_configs")
+            print("  num_configs, _ = generate_qml_experiment_configs(")
+            print("      template_config_path='configs/config.yaml',")
+            print("      output_dir='configs/qml_gridsearch',")
+            print("      data_dirs=['data/your_data_dir']")
+            print("  )")
+            print("\nSee documentation: qbiocode.utils.generate_qml_experiment_configs")
             print("="*80 + "\n")
     
     if grid_search:
