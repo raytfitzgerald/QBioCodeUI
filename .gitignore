@@ -1,7 +1,11 @@
 # Virtual environments
 venv/
+env/
+.venv/
 .env/
-.env*
+*env/
+.*env/
+*.env
 
 # Python build artifacts
 __pycache__/
