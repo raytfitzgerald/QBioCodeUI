@@ -39,13 +39,31 @@ Command-Line Interface
 
 After installing QBioCode with the apps extras (``pip install qbiocode[apps]``), you can run QProfiler from the command line:
 
-**Single Dataset Mode**
+**Basic Usage (Default Config)**
 
 .. code-block:: bash
 
-   qprofiler --config-name=config.yaml
+   qprofiler
 
-This runs QProfiler with the specified configuration file. See :doc:`Configuration Guide <config>` for details on setting up your config file.
+This runs QProfiler with the default configuration file installed with the package.
+
+**Using Custom Configuration**
+
+You can override the default configuration in several ways:
+
+.. code-block:: bash
+
+   # Use a custom config file from current directory
+   qprofiler --config-path=. --config-name=my_config
+
+   # Use a config file from a specific directory
+   qprofiler --config-path=/path/to/configs --config-name=my_config
+
+   # Override specific parameters from command line
+   qprofiler model=[svc,rf,qsvc] n_jobs=5 backend=simulator
+
+   # Combine custom config with parameter overrides
+   qprofiler --config-path=./configs --config-name=experiment1 seed=123 test_size=0.2
 
 **Batch Mode**
 
@@ -57,22 +75,48 @@ For processing multiple datasets in parallel:
 
 This will process all CSV files in the configured input directory and generate combined results.
 
-**Configuration File**
+**Configuration File Location**
 
-QProfiler uses Hydra for configuration management. Create a ``config.yaml`` file in your ``configs/`` directory:
+QProfiler uses Hydra for configuration management. By default, it uses the config file installed with the package at:
 
-.. code-block:: yaml
+.. code-block:: text
 
-   # Example config.yaml
-   file_dataset: "my_dataset.csv"
-   output_dir: "results/"
-   models:
-     - rf
-     - svc
-     - qsvc
-   embeddings:
-     - none
-     - pca
+   <site-packages>/apps/qprofiler/configs/config.yaml
+
+To use your own configuration:
+
+1. **Create a custom config file** in your project directory:
+
+   .. code-block:: yaml
+
+      # my_config.yaml
+      file_dataset: "my_dataset.csv"
+      folder_path: "data/"
+      model: [rf, svc, qsvc]
+      embeddings: [none, pca]
+      n_components: 3
+      backend: simulator
+
+2. **Run with custom config**:
+
+   .. code-block:: bash
+
+      qprofiler --config-path=. --config-name=my_config
+
+.. tip::
+   **Hydra Configuration Override Syntax:**
+   
+   - ``--config-path``: Directory containing config files
+   - ``--config-name``: Config filename (without .yaml extension)
+   - ``key=value``: Override individual parameters
+   - ``key=[item1,item2]``: Override list parameters
+   
+   Example combining all:
+   
+   .. code-block:: bash
+   
+      qprofiler --config-path=./configs --config-name=base \
+                model=[rf,svc] backend=simulator seed=42
 
 See the :doc:`full configuration guide <config>` for all available options.
 

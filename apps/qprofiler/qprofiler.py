@@ -13,6 +13,7 @@ import time
 import sys
 # ====== Hydra imports ======
 import hydra
+from hydra import compose, initialize_config_dir
 
 # ====== Scikit-learn imports ======
 from sklearn.model_selection import train_test_split
@@ -32,9 +33,13 @@ from qbiocode import get_embeddings
 from qbiocode import evaluate
 from qbiocode import model_run
 
+# Get the directory where this script is located for default config
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_CONFIG_PATH = os.path.join(SCRIPT_DIR, 'configs')
+
 current_dir = os.getcwd()
 # Begin the main function and instatiate Hydra class
-@hydra.main(config_path='./configs/', config_name='config.yaml', version_base='1.1')
+@hydra.main(config_path=DEFAULT_CONFIG_PATH, config_name='config', version_base='1.1')
 def main(args):
     """
     Main function to run the qprofiler. It initializes logging, sets up the environment, and processes datasets.
@@ -186,3 +191,4 @@ def main(args):
 
 if __name__ == "__main__":
     main()
+
