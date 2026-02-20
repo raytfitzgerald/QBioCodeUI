@@ -26,6 +26,9 @@ QProfiler is a comprehensive tool that goes beyond simple model evaluation. It p
 .. important::
     **Key Feature**: QProfiler computes data complexity metrics *before* running models, providing insights into why certain models perform better on specific datasets. This helps identify which quantum or classical approaches are most suitable for your data.
 
+.. warning::
+    **Binary Classification Focus**: QProfiler is currently optimized for **binary classification** tasks (2 classes). While multi-class classification is supported experimentally, results may vary and some metrics may not be fully optimized. For best results, use datasets with exactly 2 classes.
+
 .. note::
     Before you start, make sure that you have installed QBioCode correctly by following the  `Installation <https://ibm.github.io/QBioCode/installation.html>`_ guide.
 
@@ -423,9 +426,41 @@ Key Configuration Sections
     # Or select specific files
     file_dataset: ['dataset1.csv', 'dataset2.csv']
     
+    # Handle datasets with row names/IDs in first column
+    index_col: False  # Set to True if first column contains row identifiers
+    
     # Reproducibility seeds
     seed: 42        # Classical algorithms
     q_seed: 42      # Quantum algorithms
+
+.. important::
+    **Row Names Support:** If your CSV files have row identifiers (sample IDs, patient IDs, etc.) in the first column, set ``index_col: True``. This will:
+    
+    - Use the first column as row index (excluded from features)
+    - Properly handle datasets with sample identifiers
+    - Maintain data integrity for downstream analysis
+    
+    **Example dataset with row names:**
+    
+    .. code-block:: text
+    
+        SampleID,Feature1,Feature2,Feature3,Label
+        Patient001,0.5,0.3,0.8,0
+        Patient002,0.2,0.7,0.4,1
+        Patient003,0.9,0.1,0.6,0
+    
+    With ``index_col: True``, only Feature1, Feature2, and Feature3 are used as features (Label is the target).
+    
+    **Default behavior (index_col: False):**
+    
+    .. code-block:: text
+    
+        Feature1,Feature2,Feature3,Label
+        0.5,0.3,0.8,0
+        0.2,0.7,0.4,1
+        0.9,0.1,0.6,0
+    
+    All columns except the last are treated as features.
 
 **2. Quantum Backend Setup**
 
@@ -459,9 +494,32 @@ Key Configuration Sections
 
 .. code-block:: yaml
 
-    test_size: 0.3           # 70:30 train:test
-    stratify: ['y']          # Stratified split
-    scaling: ['True']        # Feature scaling
+    test_size: 0.3           # 70:30 train:test ratio
+    
+    # Stratified sampling - maintains class distribution in splits
+    stratify: ['y']          # Enable stratification
+    # stratify: []           # Disable stratification
+    
+    scaling: ['True']        # Enable MinMaxScaler feature scaling
+
+.. note::
+    **Stratified Sampling:**
+    
+    Stratification ensures that the class distribution in your training and test sets matches the original dataset distribution. This is particularly important for:
+    
+    - **Imbalanced datasets**: When one class has significantly fewer samples than others
+    - **Small datasets**: To ensure all classes are represented in both train and test sets
+    - **Reproducible results**: Consistent class proportions across different random splits
+    
+    **When to use stratification:**
+    
+    - ✅ **Enable** (``stratify: ['y']``): For classification tasks with imbalanced classes
+    - ✅ **Enable**: When you have small datasets with multiple classes
+    - ❌ **Disable** (``stratify: []``): When you have perfectly balanced classes and large datasets
+    
+    **Example:**
+    
+    If your dataset has 90% class 0 and 10% class 1, stratification ensures both train and test sets maintain this 90:10 ratio, preventing scenarios where the test set might have no class 1 samples.
 
 **5. Model Selection**
 
