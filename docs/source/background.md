@@ -43,6 +43,11 @@ Quantum computing leverages quantum mechanical phenomena such as superposition a
 - **Entanglement**: Quantum states can be correlated in ways impossible classically
 - **Quantum Gates**: Operations that manipulate qubits
 
+```{admonition} 📺 Video Learning Resources
+:class: tip
+For comprehensive video tutorials on these quantum computing fundamentals, see the [Qiskit YouTube Playlist: Understanding Quantum Information and Computation](https://www.youtube.com/playlist?list=PLOFEBzvs-VvqKKMXX4vbi4EB1uaErFMSO). This series provides excellent visual explanations of qubits, superposition, entanglement, and quantum gates.
+```
+
 ## Quantum Machine Learning
 
 Quantum Machine Learning (QML) combines quantum computing with machine learning algorithms to potentially achieve computational advantages for certain tasks.
@@ -588,6 +593,21 @@ QBioCode provides tools to systematically compare quantum and classical approach
 
 ### QML Libraries
 - [Qiskit Machine Learning](https://qiskit.org/ecosystem/machine-learning/)
+
+### Video Resources
+
+```{admonition} 📺 Qiskit YouTube Channel
+:class: tip
+For comprehensive video tutorials, lectures, and demonstrations on quantum computing and quantum machine learning, visit the official [Qiskit YouTube Channel](https://www.youtube.com/@qiskit). The channel features:
+
+- **Tutorial Series**: Step-by-step guides on quantum algorithms and programming
+- **Quantum Machine Learning**: Dedicated content on QML concepts and implementations
+- **Live Coding Sessions**: Hands-on demonstrations with Qiskit
+- **Research Talks**: Latest developments in quantum computing
+- **Community Events**: Qiskit Global Summer School and hackathons
+
+**Recommended Playlist**: [Understanding Quantum Information and Computation](https://www.youtube.com/playlist?list=PLOFEBzvs-VvqKKMXX4vbi4EB1uaErFMSO) - Essential foundation for quantum computing concepts used throughout QBioCode.
+```
 
 ---
 
