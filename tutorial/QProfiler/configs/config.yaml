@@ -1,4 +1,4 @@
-## This is a basic config file for the qml4omics package
+## This is a basic config file for the qprofiler package
 ## It is used to run your choice of classical machine learning (CML) and quantum machine learning (QML) models on your datasets.
 
 config_file_name: 'basic_config'
@@ -18,22 +18,22 @@ backend: 'simulator'
 # 'name' should be the account name alias you used when saving your runtime credentials.  This is relevant if you have multiple accounts stored in your json.
 # 'ibm_instance' is the instance with your account under which to run your job.  If not included, it will search for an available instance under your account if you have multiple.
 qiskit_json_path: '~/.qiskit/qiskit-ibm.json'
-name: 'cleveland_clinic'
+name: 'account_name_alias'
 # ibm_instance: 
 
 # of ML methods to parallelize
 n_jobs: 9
 
 # select the embedding method for reducing dimensionality (number of features) in your data set
-embeddings: ['none']
-# embeddings: ['pca', 'isomap', 'none']
+embeddings: ['none', 'pca']
+#embeddings: ['pca', 'isomap', 'none']
 
 # number of dimensions (features) to embed (reduce) your data down to
 n_components: 3
 
 # ML models to generate
 # model: ['svc', 'dt', 'lr', 'nb', 'rf', 'mlp', 'qsvc', 'vqc', 'qnn', 'pqk']
-model: ['svc', 'rf',  'qsvc']
+model: ['svc',  'pqk']
 #model: ['xgb']
 
 average: 'weighted'
@@ -53,7 +53,7 @@ stratify: ['y']
 scaling: ['True']
 
 # this turns on a grid search (hyperparameter tuning) for the CML methods
-grid_search: True
+grid_search: False
 
 # n-fold cross validation
 cross_validation: 5
