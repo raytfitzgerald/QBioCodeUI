@@ -58,11 +58,17 @@ def run_job(data_file, configfile, output_folder_timestamp, data_type):
     data["file_dataset"] = data_file
 
     # Write the updated data back to the file
-    config_name = 'config_'+data_type+'_'+output_folder_timestamp+'__'+data_file.replace('.csv','').replace('.txt','')+'.yaml'
-    with open('configs/'+config_name, "w") as yaml_file:
+    config_name = 'config_'+data_type+'_'+output_folder_timestamp+'__'+data_file.replace('.csv','').replace('.txt','')
+    config_dir = os.path.abspath('configs')
+    config_file = os.path.join(config_dir, config_name + '.yaml')
+    
+    # Ensure configs directory exists
+    os.makedirs(config_dir, exist_ok=True)
+    
+    with open(config_file, "w") as yaml_file:
         yaml.dump(data, yaml_file, default_flow_style=False)
     
-    commands = ["qprofiler", "--config-name="+config_name]
+    commands = ["qprofiler", f"--config-dir={config_dir}", f"--config-name={config_name}"]
     subprocess.run(commands)
 
 
