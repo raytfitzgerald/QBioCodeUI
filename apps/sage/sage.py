@@ -677,6 +677,7 @@ For more information, see: https://ibm.github.io/QBioCode/apps/sage.html
     print("\nLoading data...")
     try:
         data = pd.read_csv(args.input)
+        data['embeddings'] = data['embeddings'].fillna('none')
         print(f"Loaded {len(data)} rows with {len(data.columns)} columns")
     except Exception as e:
         print(f"Error loading data: {e}", file=sys.stderr)
