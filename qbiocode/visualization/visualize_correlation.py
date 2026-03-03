@@ -117,14 +117,16 @@ def plot_results_correlation( correlations_df, metric = 'f1_score', title = '', 
     fm = dict(zip( list(set(data['feature'])), range(len(set(data['feature']))) ) )
     data['feature_map'] = [ fm[x] for x in data['feature']]
 
+    # Fill NaN values before scaling to avoid errors
+    data = data.fillna(0)
+
     # Scale the dot size and then add an epsilon
     epsilon = 5
-    data['norm_size'] = [float(np.round(x*100))+epsilon for x in MinMaxScaler().fit_transform(data[size].values.reshape(-1,1))]
-
+    size_values = np.array(data[size].tolist()).reshape(-1, 1)
+    scaled_values = MinMaxScaler().fit_transform(size_values)
+    data['norm_size'] = (np.round(scaled_values.flatten() * 100) + epsilon).astype(float)
 
     data[key] = [ re.sub( '_', ' / ', x ) for x in data[key]]
-
-    data = data.fillna(0)
     
     plt.figure(figsize=figsize)
     ax = plt.scatter(data[key], data['feature'], s=data['norm_size'], 
