@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Upload, Trash2, Download, Eye, Database } from 'lucide-react';
 import { fetchDatasets, uploadDataset, deleteDataset as deleteDs, fetchDataset } from '../api/client';
 import type { DatasetMeta, DatasetPreview } from '../types';
@@ -8,6 +8,7 @@ export default function DatasetManager() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [selected, setSelected] = useState<DatasetPreview | null>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
   const load = useCallback(async () => {
@@ -49,6 +50,8 @@ export default function DatasetManager() {
   const handleView = async (id: string) => {
     const r = await fetchDataset(id);
     setSelected(r.data);
+    // Scroll preview into view after React renders it
+    setTimeout(() => previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   };
 
   return (
@@ -128,7 +131,7 @@ export default function DatasetManager() {
 
       {/* Preview panel */}
       {selected && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div ref={previewRef} className="bg-white rounded-xl border border-slate-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-slate-900">Preview: {selected.meta.name}</h3>
             <button onClick={() => setSelected(null)} className="text-sm text-slate-400 hover:text-slate-600">Close</button>
