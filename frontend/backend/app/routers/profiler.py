@@ -59,7 +59,9 @@ def _run_profiler(req_dict: dict, progress_callback=None):
     import pandas as pd
     from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import MinMaxScaler, OrdinalEncoder
-    from qbiocode import evaluate, get_embeddings, model_run
+    from qbiocode.evaluation.dataset_evaluation import evaluate
+    from qbiocode.embeddings.embed import get_embeddings
+    from qbiocode.evaluation.model_run import model_run
 
     dataset_ids = req_dict["dataset_ids"]
     models = req_dict.get("models", ["svc", "dt", "lr", "nb", "rf"])

@@ -69,7 +69,7 @@ def _run_generation(req_dict: dict, progress_callback=None):
     if project_root not in sys.path:
         sys.path.insert(0, project_root)
 
-    from qbiocode import generate_data
+    from qbiocode.data_generation.generator import generate_data
     import pandas as pd
 
     with tempfile.TemporaryDirectory() as tmpdir:

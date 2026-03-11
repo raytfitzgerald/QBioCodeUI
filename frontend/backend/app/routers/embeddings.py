@@ -35,7 +35,7 @@ def _run_embedding(req_dict: dict, progress_callback=None):
 
     import pandas as pd
     from sklearn.model_selection import train_test_split
-    from qbiocode import get_embeddings
+    from qbiocode.embeddings.embed import get_embeddings
 
     if progress_callback:
         progress_callback(0.1, "Loading dataset...")
@@ -66,7 +66,7 @@ def _run_embedding(req_dict: dict, progress_callback=None):
         progress_callback(0.3, f"Computing {method} embedding...")
 
     if method == "pqk":
-        from qbiocode import pqk
+        from qbiocode.embeddings.embed import pqk
         args = {
             "backend": qc.get("backend", "simulator"),
             "seed": seed,

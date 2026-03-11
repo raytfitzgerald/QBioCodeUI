@@ -48,7 +48,7 @@ def _run_evaluation(dataset_id: str, label_column: str, progress_callback=None):
         sys.path.insert(0, project_root)
 
     import pandas as pd
-    from qbiocode import evaluate
+    from qbiocode.evaluation.dataset_evaluation import evaluate
 
     if progress_callback:
         progress_callback(0.1, "Loading dataset...")

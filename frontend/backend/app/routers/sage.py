@@ -91,7 +91,7 @@ def _run_sage_predict(req_dict: dict, progress_callback=None):
 
     import pandas as pd
     import numpy as np
-    from qbiocode import evaluate
+    from qbiocode.evaluation.dataset_evaluation import evaluate
 
     sage_id = req_dict["sage_model_id"]
     sage_dir = settings.RESULTS_DIR / "sage" / sage_id

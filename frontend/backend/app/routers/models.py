@@ -149,16 +149,17 @@ def _run_training(req_dict: dict, progress_callback=None):
 
     import pandas as pd
     from sklearn.model_selection import train_test_split
-    from qbiocode import (
-        scaler_fn, feature_encoding,
-        compute_svc, compute_svc_opt,
-        compute_dt, compute_dt_opt,
-        compute_nb, compute_nb_opt,
-        compute_lr, compute_lr_opt,
-        compute_rf, compute_rf_opt,
-        compute_mlp, compute_mlp_opt,
-        compute_qsvc, compute_qnn, compute_vqc, compute_pqk,
-    )
+    from qbiocode.utils.helper_fn import scaler_fn, feature_encoding
+    from qbiocode.learning.compute_svc import compute_svc, compute_svc_opt
+    from qbiocode.learning.compute_dt import compute_dt, compute_dt_opt
+    from qbiocode.learning.compute_nb import compute_nb, compute_nb_opt
+    from qbiocode.learning.compute_lr import compute_lr, compute_lr_opt
+    from qbiocode.learning.compute_rf import compute_rf, compute_rf_opt
+    from qbiocode.learning.compute_mlp import compute_mlp, compute_mlp_opt
+    from qbiocode.learning.compute_qsvc import compute_qsvc
+    from qbiocode.learning.compute_qnn import compute_qnn
+    from qbiocode.learning.compute_vqc import compute_vqc
+    from qbiocode.learning.compute_pqk import compute_pqk
 
     if progress_callback:
         progress_callback(0.1, "Loading dataset...")
@@ -236,7 +237,7 @@ def _run_training(req_dict: dict, progress_callback=None):
 
     if model_name == "xgb":
         try:
-            from qbiocode import compute_xgb, compute_xgb_opt
+            from qbiocode.learning.compute_xgb import compute_xgb, compute_xgb_opt
             compute_fns["xgb"] = (compute_xgb, compute_xgb_opt)
         except ImportError:
             raise ValueError("XGBoost not available")

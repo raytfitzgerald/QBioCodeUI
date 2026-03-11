@@ -1,12 +1,32 @@
-import asyncio
-from contextlib import asynccontextmanager
+"""QBioCode UI — FastAPI backend application."""
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
+# ── Environment fixes (MUST be first) ────────────────────────────────────
+# These prevent grpcio mutex deadlocks on macOS and suppress noisy logs.
+# They must be set before *any* library that touches grpc is imported.
+import os
 
-from .config import settings
-from .services.job_manager import job_manager
-from .routers import datasets, generation, evaluation, models, embeddings, profiler, sage, jobs
+os.environ.setdefault("GRPC_ENABLE_FORK_SUPPORT", "0")
+os.environ.setdefault("GRPC_POLL_STRATEGY", "poll")
+os.environ.setdefault("OBJC_DISABLE_INITIALIZE_FORK_SAFETY", "YES")
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
+os.environ.setdefault("GRPC_VERBOSITY", "ERROR")
+os.environ.setdefault("MPLBACKEND", "Agg")
+
+# ── Pre-register qbiocode stubs so __init__.py never runs ────────────────
+from .qbiocode_loader import install_lazy_stubs  # noqa: E402
+
+install_lazy_stubs()
+
+# ── Normal imports ───────────────────────────────────────────────────────
+import asyncio  # noqa: E402
+from contextlib import asynccontextmanager  # noqa: E402
+
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+
+from .config import settings  # noqa: E402
+from .services.job_manager import job_manager  # noqa: E402
+from .routers import datasets, generation, evaluation, models, embeddings, profiler, sage, jobs  # noqa: E402
 
 
 @asynccontextmanager
