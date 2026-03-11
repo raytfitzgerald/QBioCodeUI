@@ -65,9 +65,10 @@ def get_dataset_preview(dataset_id: str, n_rows: int = 20) -> dict | None:
     df = load_dataset_df(dataset_id)
     if df is None:
         return None
+    subset = df if n_rows == 0 else df.head(n_rows)
     return {
         "meta": meta,
-        "head": df.head(n_rows).to_dict(orient="records"),
+        "head": subset.to_dict(orient="records"),
         "dtypes": {col: str(dtype) for col, dtype in df.dtypes.items()},
         "stats": json.loads(df.describe(include="all").to_json()),
     }

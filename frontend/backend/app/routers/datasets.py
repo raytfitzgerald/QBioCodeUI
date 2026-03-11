@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File
 from fastapi.responses import FileResponse
 
 from ..services import dataset_service
@@ -12,8 +14,9 @@ async def list_datasets():
 
 
 @router.get("/{dataset_id}")
-async def get_dataset(dataset_id: str):
-    data = dataset_service.get_dataset_preview(dataset_id)
+async def get_dataset(dataset_id: str, rows: Optional[int] = Query(None, description="Max rows to return (default 20, 0 = all)")):
+    n = rows if rows is not None else 20
+    data = dataset_service.get_dataset_preview(dataset_id, n_rows=n)
     if not data:
         raise HTTPException(404, "Dataset not found")
     return data

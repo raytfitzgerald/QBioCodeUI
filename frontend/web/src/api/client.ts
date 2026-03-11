@@ -9,7 +9,8 @@ export default api;
 
 // ---- Datasets ----
 export const fetchDatasets = () => api.get('/datasets');
-export const fetchDataset = (id: string) => api.get(`/datasets/${id}`);
+export const fetchDataset = (id: string, rows?: number) =>
+  api.get(`/datasets/${id}`, { params: rows !== undefined ? { rows } : {} });
 export const uploadDataset = (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
